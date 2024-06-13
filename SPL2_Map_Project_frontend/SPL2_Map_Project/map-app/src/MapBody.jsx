@@ -442,7 +442,7 @@ function MapBody() {
               icon={customMarkerIcon}
             >
               <Popup>
-                {incidents.map((incident, index) => (
+                {/* {incidents.map((incident, index) => (
                   <div key={index}>
                     <strong>Incident:</strong> {incident.incident}
                     <br />
@@ -450,7 +450,24 @@ function MapBody() {
                     <br />
                     <hr />
                   </div>
-                ))}
+
+                  ))} */}
+
+                {incidents
+                  .sort(
+                    (a, b) =>
+                      new Date(b.date_of_incident) -
+                      new Date(a.date_of_incident)
+                  )
+                  .map((incident, index) => (
+                    <div key={index}>
+                      <strong>{incident.incident}</strong>
+                      <br />
+                      {new Date(incident.date_of_incident).toLocaleString()}
+                      <br />
+                      <br />
+                    </div>
+                  ))}
               </Popup>
             </Marker>
           );
