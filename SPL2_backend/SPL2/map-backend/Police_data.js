@@ -99,26 +99,64 @@ router.post('/new', async (req, res) => {
 
 })
 
+// router.post('/userinput', async (req, res) => {
+//     const { current_lat, current_lng, incident, date } = req.body;
+
+//     if ( ! current_lat || ! current_lng || ! incident || ! date ) {
+//         return res.status(400).json({ error: 'all information are required' });
+//     }
+
+//     try {
+//         // Query to find the user by email
+//         const result = await db.query(
+//             'INSERT INTO police_data (latitude, longitude, incident, date_of_incident) VALUES ($1, $2, $3, $4) RETURNING *',
+//             [current_lat, current_lng, incident, date]
+//         );
+//         // Successfully authenticated
+//         // Here you would typically assign a token or start a session
+//         res.status(200).json({ message: 'successful', result:result.rows[0]});
+//     } catch (err) {
+//         console.error(err);
+//         res.status(500).json({ error: 'Internal server error' });
+//     }
+// });
+
+const sendNotification = require('./mailer');
+
 router.post('/userinput', async (req, res) => {
-    const { current_lat, current_lng, incident, date } = req.body;
+  const { current_lat, current_lng, incident, date } = req.body;
 
-    if ( ! current_lat || ! current_lng || ! incident || ! date ) {
-        return res.status(400).json({ error: 'all information are required' });
-    }
+  if (!current_lat || !current_lng || !incident || !date) {
+    return res.status(400).json({ error: 'All information is required' });
+  }
 
-    try {
-        // Query to find the user by email
-        const result = await db.query(
-            'INSERT INTO police_data (latitude, longitude, incident, date_of_incident) VALUES ($1, $2, $3, $4) RETURNING *',
-            [current_lat, current_lng, incident, date]
-        );
-        // Successfully authenticated
-        // Here you would typically assign a token or start a session
-        res.status(200).json({ message: 'successful', result:result.rows[0]});
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: 'Internal server error' });
-    }
+  try {
+    // Insert the new incident
+    const result = await db.query(
+      'INSERT INTO police_data (latitude, longitude, incident, date_of_incident) VALUES ($1, $2, $3, $4) RETURNING *',
+      [current_lat, current_lng, incident, date]
+    );
+
+    // Check for matching favorite routes
+    const favorites = await db.query(
+      'SELECT u.email, f.current_latitude, f.current_longitude, f.destination_latitude, f.destination_longitude \
+       FROM favourite f \
+       JOIN user_data u ON f.user_id = u.id \
+       WHERE f.current_latitude = $1 OR f.current_longitude = $2 OR f.destination_latitude = $1 OR f.destination_longitude = $2',
+      [current_lat, current_lng]
+    );
+
+    // Send notifications
+    favorites.rows.forEach(favorite => {
+      const emailText = `A new incident (${incident}) has been reported at (${current_lat}, ${current_lng}) on ${date}. This location matches one of your favorite routes.`;
+      sendNotification(favorite.email, 'New Incident Alert', emailText);
+    });
+
+    res.status(200).json({ message: 'Incident added successfully', result: result.rows[0] });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 });
 
 module.exports = router
