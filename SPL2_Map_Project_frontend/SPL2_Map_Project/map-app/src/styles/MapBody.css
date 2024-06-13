@@ -1,0 +1,51 @@
+.incident-marker{
+    color: brown;
+}
+
+/* .topbar {
+
+    border: none;
+    color: white;
+    padding: 5px 8px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+  }
+
+.button {
+    background-color: rgb(12, 91, 156);
+    color: white;
+    padding: 10px;
+    margin: 5px;
+
+} */
+
+
+
+.incident-marker {
+    color: brown;
+}
+
+.topbar {
+    border: none;
+    color: white;
+    padding: 5px 8px;
+    text-align: center;
+    display: flex; /* Use Flexbox layout */
+    justify-content: center; /* Center align the buttons */
+    gap: 10px; /* Space between buttons */
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+}
+
+.button {
+    background-color: rgb(12, 91, 156);
+    color: white;
+    padding: 10px;
+    margin: 5px;
+    display: inline-block;
+}
